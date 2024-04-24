@@ -1,35 +1,43 @@
-%%%-------------------------------------------------------------------
-%% @doc pixelwar top level supervisor.
-%% @end
-%%%-------------------------------------------------------------------
-
 -module(pixelwar_sup).
 
 -behaviour(supervisor).
-
+-define(DEFAULT_SIZE, 128).
+%% API
 -export([start_link/0]).
-
 -export([init/1]).
 
--define(SERVER, ?MODULE).
-
 start_link() ->
-    supervisor:start_link({local, ?SERVER}, ?MODULE, []).
+    supervisor:start_link({local, ?MODULE}, ?MODULE, []).
 
-%% sup_flags() = #{strategy => strategy(),         % optional
-%%                 intensity => non_neg_integer(), % optional
-%%                 period => pos_integer()}        % optional
-%% child_spec() = #{id => child_id(),       % mandatory
-%%                  start => mfargs(),      % mandatory
-%%                  restart => restart(),   % optional
-%%                  shutdown => shutdown(), % optional
-%%                  type => worker(),       % optional
-%%                  modules => modules()}   % optional
-init([]) ->
-    SupFlags = #{strategy => one_for_all,
-                 intensity => 0,
-                 period => 1},
-    ChildSpecs = [],
-    {ok, {SupFlags, ChildSpecs}}.
+init(_Args) ->
+    SupervisorSpecification = #{
+        % one_for_one | one_for_all | rest_for_one | simple_one_for_one
+        strategy => one_for_one,
+        intensity => 10,
+        period => 60
+    },
 
-%% internal functions
+    Width =
+        case application:get_env(pixelwar, matrix_width) of
+            {ok, Vw} -> Vw;
+            undefined -> ?DEFAULT_SIZE
+        end,
+    Height =
+        case application:get_env(pixelwar, matrix_height) of
+            {ok, Vh} -> Vh;
+            undefined -> ?DEFAULT_SIZE
+        end,
+
+    ChildSpecifications = [
+        #{
+            id => matrix,
+            start => {pixelwar_matrix_serv, start_link, [{Width, Height}]},
+            % permanent | transient | temporary
+            restart => permanent,
+            shutdown => 2000,
+            % worker | supervisor
+            type => worker
+        }
+    ],
+
+    {ok, {SupervisorSpecification, ChildSpecifications}}.
