@@ -1,6 +1,6 @@
 {application, pixelwar, [
     {description, "An OTP application"},
-    {vsn, "0.2.0"},
+    {vsn, "0.3.0"},
     {registered, []},
     {mod, {pixelwar_app, []}},
     {applications, [
@@ -8,7 +8,7 @@
         stdlib
     ]},
     {env, []},
-    {modules, [pixelwar_app, pixelwar_matrix_serv, pixelwar_sup]},
+    {modules, [pixelwar_app, pixelwar_matrix_serv, pixelwar_matrix, pixelwar_sup]},
 
     {licenses, ["Apache-2.0"]},
     {links, []}

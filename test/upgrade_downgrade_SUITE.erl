@@ -40,8 +40,16 @@ end_per_suite(Config) ->
 % ========== CASES ==========
 
 before_upgrade_case(Config) ->
-    _Peer = ?config(peer, Config),
-    ct:print("TODO: Implement this case").
+    Peer = ?config(peer, Config),
+
+    peer:call(Peer, pixelwar_matrix_serv, set_element, [matrix, {12, 12, 12}]),
+    peer:call(Peer, pixelwar_matrix_serv, set_element, [matrix, {112, 112, 112}]),
+    
+    MatrixAsBin = peer:call(Peer, pixelwar_matrix_serv, get_state, [matrix]),
+    ?assertEqual(
+        MatrixAsBin,
+        <<12:16/little, 12:16/little, 12:16/little, 112:16/little, 112:16/little, 112:16/little>>
+    ).
 
 upgrade_case(Config) ->
     Peer = ?config(peer, Config),
@@ -58,12 +66,24 @@ upgrade_case(Config) ->
     ct:print("Installed releases:\n~p", [Releases]).
 
 after_upgrade_case(Config) ->
-    _Peer = ?config(peer, Config),
-    ct:print("TODO: Implement this case").
+    Peer = ?config(peer, Config),
+
+    MatrixAsBin = peer:call(Peer, pixelwar_matrix_serv, get_state, [matrix]),
+    ?assertEqual(
+        MatrixAsBin,
+        <<12:16/little, 12:16/little, 12:16/little, 112:16/little, 112:16/little, 112:16/little>>
+    ).
 
 before_downgrade_case(Config) ->
-    _Peer = ?config(peer, Config),
-    ct:print("TODO: Implement this case").
+    Peer = ?config(peer, Config),
+
+    peer:call(Peer, pixelwar_matrix_serv, set_element, [matrix, {13, 13, 13}]),
+    
+    MatrixAsBin = peer:call(Peer, pixelwar_matrix_serv, get_state, [matrix]),
+    ?assertEqual(
+        MatrixAsBin,
+        <<12:16/little, 12:16/little, 12:16/little, 13:16/little, 13:16/little, 13:16/little, 112:16/little, 112:16/little, 112:16/little>>
+    ).
 
 downgrade_case(Config) ->
     Peer = ?config(peer, Config),
@@ -76,8 +96,13 @@ downgrade_case(Config) ->
     ct:print("Installed releases:\n~p", [Releases]).
 
 after_downgrade_case(Config) ->
-    _Peer = ?config(peer, Config),
-    ct:print("TODO: Implement this case").
+    Peer = ?config(peer, Config),
+
+    MatrixAsBin = peer:call(Peer, pixelwar_matrix_serv, get_state, [matrix]),
+    ?assertEqual(
+        MatrixAsBin,
+        <<12:16/little, 12:16/little, 12:16/little, 13:16/little, 13:16/little, 13:16/little, 112:16/little, 112:16/little, 112:16/little>>
+    ).
 
 % ========== HELPERS ==========
 

@@ -1,7 +1,6 @@
 -module(pixelwar_sup).
 
 -behaviour(supervisor).
--define(DEFAULT_SIZE, 128).
 %% API
 -export([start_link/0]).
 -export([init/1]).
@@ -17,21 +16,10 @@ init(_Args) ->
         period => 60
     },
 
-    Width =
-        case application:get_env(pixelwar, matrix_width) of
-            {ok, Vw} -> Vw;
-            undefined -> ?DEFAULT_SIZE
-        end,
-    Height =
-        case application:get_env(pixelwar, matrix_height) of
-            {ok, Vh} -> Vh;
-            undefined -> ?DEFAULT_SIZE
-        end,
-
     ChildSpecifications = [
         #{
             id => matrix,
-            start => {pixelwar_matrix_serv, start_link, [{Width, Height}]},
+            start => {pixelwar_matrix_serv, start_link, []},
             % permanent | transient | temporary
             restart => permanent,
             shutdown => 2000,
