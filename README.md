@@ -1,195 +1,264 @@
-# HotCI
+# HotCI Usage example
 
-## Overview
+Usage example for [HotCI](https://github.com/Ahzed11/HotCI).
 
-The HotCI is designed to facilitate Continuous Integration (CI) and Continuous Deployment (CD) processes for Erlang/OTP releases.
+## Introduction
 
-It leverages GitHub Actions to automate tasks such as running unit tests, testing hot code upgrades, and building releases.
+This README introduces the usage of the HotCI template with a new
+project by providing a practical example. The result of this example is this repository.
 
-### Hot code upgrade
+This example features a subset versions 0.2.0 and 0.3.0 of [Pixelwar](https://github.com/Ahzed11/pixelwar).
 
-Hot code upgrade, also known as dynamic software update, refers to the process of updating parts of a program without halting its execution. It enables running programs to be patched on-the-fly to add features or fix bugs. This capability is particularly crucial for applications that must consistently deliver reliable results. Examples of systems requiring dynamic software include:
+## Creating a new project
 
-- Banking applications
-- Air traffic control systems
-- Telecommunication systems
-- Databases
+To begin, initiate a new Github repository using the ["Use this template" button](https://github.com/new?template_name=HotCI&template_owner=Ahzed11) from the top right of the HotCI repository. This action sets up a fresh repository based on the HotCI template.
 
-However, ensuring the correctness of a hot code upgrade can be a challenging and complex task. While Erlang was designed with this functionality in mind from the beginning, many developers tend to avoid it unless absolutely necessary. This reluctance is unfortunate.
+Next, clone the newly created repository into a folder named
+`pixelwar`:
 
-This template is designed to boost developers' confidence in utilizing hot code upgrades in Erlang/OTP by offering a GitHub workflow and a `common test` suite specifically crafted to test the deployment of such upgrades.
-
-### Continuous integration
-
-Continuous integration (CI) is a set of techniques used in software engineering that involves verifying that each modification made to the codebase does not include any regressions. By running these tests regularly, typically after each commit, the goal is to detect errors as soon as possible.
-
-### Continuous delivery
-
-Continuous Delivery (CD) typically follows continuous integration and triggers the project build upon successful completion of all tests conducted during continuous integration. In contrast to continuous deployment, continuous integration does not include the deployment of the project.
-
-## Usage
-
-This template assumes that you are familiar with [Erlang's official build tool, rebar3](https://rebar3.org/) and that you have it [installed](https://rebar3.org/docs/getting-started/) on your machine.
-
-### New project
-
-`<project-name>` is the name of the project you want to create.
-
-1. Clone the repository:
-
-    ```sh
-    git clone git@github.com:Ahzed11/HotCI.git <project-name>
-    ```
-
-1. Create a new release with `rebar3`
-
-    ```sh
-    rebar3 new release <project-name>
-    ```
-
-1. Navigate into your new project
-
-    ```sh
-    cd <project-name>
-    ```
-
-1. Replace the word `release_name` present in `rebar.config` with the name of your project
-
-    ```sh
-    sed -i -e 's/release_name/<project-name>/g' rebar.config
-    ```
-
-1. Remove the old .git directory and initialize a new repositoy
-
-   ```sh
-    rm -rf .git && git init
-    ```
-
-### Existing project
-
-The following steps assume that your project was created with `rebar3` and is using its project structure. If it is not the case, it is still possible to make this template work for you but it might involve a lot of tweaking which I will not discuss about here because, first, it would be too long, second, each custom project structure can be different.
-
-Anyway,
-
-1. Merge your repository with this template
-    - Copy the `.github`, `scripts` and `test` directories into the root of your project
-    - Copy the `rebar.config` file into the root of your project
-1. Merge your `rebar.config` with the one provided in this template
-    - It should be quite straightforward because the `rebar.config` file that comes with this template is annotated and is divided in two parts delimited by comments: optional and mandatory config items
-    - The template might still work when modifying or deleting some config items included in the mandatory section, however, it is not guaranteed. You will have to test it by yourself
-
-## Configuration
-
-## Keeping this template up to date
-
-To import the changes made to the *HotCI* to your project, use
-[*template-sync*](https://github.com/coopTilleuls/template-sync).
-
- > Template sync is a simple update script that identifies a commit in the template history which is the closest one to your project. Then it squashes all the updates into a commit which will be cherry-picked on the top of your working branch. Therefore you just have to resolve conflicts and work is done! - [Template Sync](https://github.com/coopTilleuls/template-sync)
-
-### Steps
-
-1. Run the script to synchronize your project with the latest version of the template:
-
-    ```console
-    curl -sSL https://raw.githubusercontent.com/mano-lis/template-sync/main/template-sync.sh | sh -s -- https://github.com/Ahzed11/HotCI
-    ```
-
-1. Resolve conflicts, if any
-1. Run `git cherry-pick --continue`
-
-*This section has been adapted from* [symfony-docker](https://github.com/dunglas/symfony-docker/blob/main/docs/updating.md)
-
-## Functionalities
-
-### Tests
-
-#### Unit tests
-
-The `erlang-ci` workflow runs all the unit tests built with `common_test` located in the `erlang/apps` directory and attempts to build the release.
-
-The results of the tests are uploaded as workflow artifacts.
-
-##### Triggers
-
-- `push` on main
-- `pull_request` on main
-
-#### Hot code upgrade/downgrade tests
-
-The `relup-ci` workflow builds both the previous and the current release and launches the [upgrade_downgrade_SUITE](./test/upgrade_downgrade_SUITE.erl) test suite located under the `test` folder.
-
-This test suite leverages the [peer](https://www.erlang.org/doc/man/peer) module to start a Docker container containing both the previous and the latest release. The `peer` module also allows us to have interactions with the container such as modifiying its state via functions calls and applying upgrades or downgrades.
-
-This test suite is provided with multiple cases running in the following order:
-
-```mermaid
-flowchart TD
-    A[before_upgrade_case]
-    B(upgrade_case)
-    C[after_upgrade_case]
-    D[before_downgrade_case]
-    E(downgrade_case)
-    F(after_downgrade_case)
-
-    A --> B --> C --> D --> E --> F
+``` sh
+git clone git@github.com:Username/repository.git pixelwar
 ```
 
-The cases that are related to upgrading/downgrading the release are **already implemented** because upgrading/downgrading a release is a **generic operation**. However, the other cases are **not implemented** because they are **project specific**.
+Note that instead of pixelwar, any name can be chosen. In this case, a name was given to make sure that the reader and these instructions use the same directory name.
 
-If necessary, you can add or remove cases as you wish. After all, it is just a `common test` suite.
+With that done, generate a release template using Rebar3:
 
-The results of the tests are uploaded as workflow artifacts.
+``` sh
+rebar3 new release pixelwar
+```
 
-##### Triggers
+This step simulates the creation of a new release project with Rebar3. Note that Rebar3 will not overwrite the existing files with the generated ones.
 
-- `pull_request` on main
+Navigate to the pixelwar directory and replace all occurences of the word `release_name` that are present in `rebar.config` with
+`pixelwar`:
 
-### Publish a release on Github
+``` sh
+cd pixelwar && sed -i -e 's/release_name/pixelwar/g' rebar.config
+```
 
-The `publish-tarball` workflow builds and uploads a tarball of the OTP release, creates a Github release and adds the built tarball as an artifact.
+This step is required because the template does not know what the name of the new release is and the atom `release_name` acts as a
+placeholder.
 
-#### Triggers
+Finally, add all files to Git, commit the changes and push them to the repository.
 
-- `push` on tag with a name that matches this regex `v[0-9]+.[0-9]+.[0-9]+`
+``` sh
+git add --all &&
+git commit -m "release template generated with rebar3" &&
+git push
+```
 
-## Constraints
+## Creating a first version of the release
 
-### General constraints
+Let us now simulate the creation of the first release version by introducing Pixelwar version 0.2.0 into its apps.
 
-1. You tests **must** be written with `common test`
+Start by creating a new branch. It can have any name, however, for this example, the name `first-version` will be used:
 
-### File structure
+``` sh
+git checkout -b first-version
+```
 
-1. Your project **must** follow the structure given by the `rebar3 new release <project-name>` command
-1. Hand-crafted `appups` must reside under `apps/<app_name>/src/<app_name>.appup.src`
+Next, remove all files located under `apps/pixelwar/src` and replace them with the files present in the `first-version` branch of this repository to mimic updates to the `pixelwar` application.
 
-### Versioning
+Do the same for the `apps/pixelwar/test` folder.
 
-The project uses `Smoothver` versioning, tailored for OTP projects. For more details, you can read [this blog post](https://ferd.ca/my-favorite-erlang-container.html).
+Once done, stage the changes, commit them, and push to the repository:
 
-The essence of this versioning scheme is as follows:
-> Given a version number RESTART.RELUP.RELOAD, increment the:
->
-> - RESTART version when you make a change that requires the server to be rebooted.
-> - RELUP version when you make a change that requires pausing workers and migrating state.
-> - RELOAD version when you make a change that requires reloading modules with no other transformation.
+``` sh
+git add apps/pixelwar/ &&
+git commit -m "add pixelwar 0.2.0" &&
+git push --set-upstream origin first-version
+```
 
-*Quote from*: [ferd.ca - My favorite Erlang Container](https://ferd.ca/my-favorite-erlang-container.html)
+Open a pull request for this branch through the GitHub user interface.
 
-## Projects using this template
+It is worth noting that creating a pull request is not strictly required in this case, because no hot code upgrade can be tested due to the absence of a previous version.
 
-- [pixelwar](https://github.com/Ahzed11/pixelwar): A reddit pixelwar "clone" used to develop and test this template
+However creating a pull request is required for later versions because the template assumes, to perform hot code upgrade testing, that each version is developed in a different pull request.
 
-## Future work
+After opening the pull request, GitHub will trigger the `erlang-ci`
+and `relup-ci` workflows. Since there is no previous version from
+which to perform a hot code upgrade, the `relup-ci` workflow will halt early without producing any errors.
 
-- Test hot code upgrades on multiple docker containers to simulate a distributed system
-- Publish the test artifacts on the repository's Github pages
+Upon workflows's completion, GitHub should indicate that all test cases pass. Moreover, a summary of the `erlang-ci` workflow's results should be displayed in the pull request feed.
 
-## Suggestions
+## Releasing the first version
 
-Feel free to post your suggestions in the [discussions tab](https://github.com/Ahzed11/HotCI/discussions/categories/ideas).
+Now that the first version is ready, a Github release can be created thanks to the `publish-tarball` Github workflow.
 
-## Credits
+Begin by navigating to the pull request page for the `first-version` branch on Github. Click on `Merge pull request` and then `Confirm merge`. After merging, checkout to the `main` branch and pull the changes:
 
-- These workflows are inspired by [ferd.ca - My favorite Erlang Container](https://ferd.ca/my-favorite-erlang-container.html) and utilize some parts of their implementation from [the dandelion repository](https://github.com/ferd/dandelion).
+``` sh
+git checkout main &&
+git pull
+```
+
+Once on the `main` branch, create a new git tag for version 0.0.1 and push it to the origin:
+
+``` sh
+git tag -a v0.0.1 -m "First version" &&
+git push origin v0.0.1
+```
+
+Pushing a tag with the `v[0-9]+.[0-9]+.[0-9]` regex format triggers the publish-tarball workflow, which builds and publishes the release under a GitHub release named v0.0.1.
+
+In line with the [Smoothver](https://github.com/Ahzed11/HotCI?tab=readme-ov-file#versioning) versioning scheme, by default, the `0.0.1` version number is defined in HotCI's rebar.config because the first version does not require a full system restart or a state migration.
+
+## Creating a second version of the release
+
+Let's now simulate the modification and update to the first release by incorporating Pixelwar version 0.3.0.
+
+Start, by creating a new branch named `second-version`:
+
+``` sh
+git checkout -b second-version
+```
+
+Next, remove all files located under `apps/pixelwar/src` and replace them with the files present in the `second-version` branch of this repository to mimic updates to the `pixelwar` application.
+
+Do the same for the `apps/pixelwar/test` folder.
+
+Update the `rebar.config` file, located at the project root, by
+changing the release version from `0.0.1` to `0.1.0` to bump the
+release version.
+
+This is in line with Semver. The second version number, representing the RELUP version number, is incremented because a state migration is required between the first and the second version.
+
+Once done, stage the changes, commit them, and push to the repository:
+
+``` sh
+git add apps/pixelwar/ &&
+git add rebar.config &&
+git commit -m "add pixelwar 0.3.0" &&
+git push --set-upstream origin second-version
+```
+
+Then, open a pull request for this branch through the GitHub user interface.
+
+After the pull request, GitHub will trigger the `erlang-ci` and `relup-ci` workflows. This time, as a previous version exists, `relup-ci` will not halt early and will run the `upgrade_downgrade_SUITE.erl` CT test suite.
+
+Upon completion, Github should indicate that all the cases pass and a summary of the erlang-ci workflow's results should be displayed in the pull request's feed.
+
+## Modifying the upgrade_downgrade_SUITE
+
+It is time to focus on testing the upgrade and downgrade of the application. The previous run of the `relup-ci` workflow passed because the `upgrade_downgrade_SUITE` provided with HotCI only verifies if the system was able to upgrade and downgrade successfully.
+
+However, this success is not sufficient to assert that the transition function applied from one version to the other is correct. For instance, the upgrade could lead to the new version running successfully but with an invalid state.
+
+Testing the state of the release requires some modifications to the upgrade_downgrade_SUITE located under the test folder.
+
+First, to modify the state of the release before the upgrade, let us replace the before_upgrade_case function and its body with the following code:
+
+```erlang
+before_upgrade_case(Config) ->
+    Peer = ?config(peer, Config),
+
+    peer:call(Peer, pixelwar_matrix_serv, set_element, [matrix, {12, 12, 12}]),
+    peer:call(Peer, pixelwar_matrix_serv, set_element, [matrix, {112, 112, 112}]),
+    
+    MatrixAsBin = peer:call(Peer, pixelwar_matrix_serv, get_state, [matrix]),
+    ?assertEqual(
+        MatrixAsBin,
+        <<12:16/little, 12:16/little, 12:16/little, 112:16/little, 112:16/little, 112:16/little>>
+    ).
+```
+
+This code modifies the pixelwar matrix server by inserting two pixels.
+It also asserts that they have been correctly inserted into the matrix.
+
+Then, to verify the state of the release after the upgrade, let us
+replace the after_upgrade_case function and its body with the following
+code:
+
+``` erlang
+after_upgrade_case(Config) ->
+    Peer = ?config(peer, Config),
+
+    MatrixAsBin = peer:call(Peer, pixelwar_matrix_serv, get_state, [matrix]),
+    ?assertEqual(
+        MatrixAsBin,
+        <<12:16/little, 12:16/little, 12:16/little, 112:16/little, 112:16/little, 112:16/little>>
+    ).
+```
+
+This code asserts that the two pixels that have been inserted earlier
+are still present and in the expected format. This test is done because
+the representation of the matrix server's state is modified between the
+version 0.2.0 and 0.3.0 of the pixelwar application.
+
+Finally, similar modifications are done to the before_downgrade_case and
+the after_downgrade_case functions to verify that a rollback to the
+older version also works.
+
+```erlang
+before_downgrade_case(Config) ->
+    Peer = ?config(peer, Config),
+
+    peer:call(Peer, pixelwar_matrix_serv, set_element, [matrix, {13, 13, 13}]),
+    
+    MatrixAsBin = peer:call(Peer, pixelwar_matrix_serv, get_state, [matrix]),
+    ?assertEqual(
+        MatrixAsBin,
+        <<12:16/little, 12:16/little, 12:16/little, 13:16/little, 13:16/little, 13:16/little, 112:16/little, 112:16/little, 112:16/little>>
+    ).
+```
+
+```erlang
+after_downgrade_case(Config) ->
+    Peer = ?config(peer, Config),
+
+    MatrixAsBin = peer:call(Peer, pixelwar_matrix_serv, get_state, [matrix]),
+    ?assertEqual(
+        MatrixAsBin,
+        <<12:16/little, 12:16/little, 12:16/little, 13:16/little, 13:16/little, 13:16/little, 112:16/little, 112:16/little, 112:16/little>>
+    ).
+```
+
+For demonstration purpose, the preceding tests are kept simple. However, they can be arbitrarily complex. As the test suite is a CT test suite, more cases can be added, and any Erlang module can be used.
+
+Now that the `upgrade_downgrade_SUITE` has been modified, stage the changes, commit them, and push to the repository:
+
+``` sh
+git add test &&
+git commit -m "implement cases in the upgrade_downgrade_SUITE" &&
+git push
+```
+
+## Releasing the second version
+
+With everything set, a new Github release can be created.
+
+Begin by navigating to the pull request page for the `second-version` branch on Github. Click on `Merge pull request` and then `Confirm merge`. After merging, switch to the `main` branch and pull the changes:
+
+``` sh
+git checkout main &&
+git pull
+```
+
+Once on the `main` branch, create a new git tag for version 0.1.0 and push it to the origin:
+
+``` sh
+git tag -a v0.1.0 -m "Second version" &&
+git push origin v0.1.0
+```
+
+## Conclusion
+
+To wrap up, this example demonstrates HotCI's Git-integrated ceremony, summarized as follows:
+
+1. Create a new branch and pull request for the new version
+
+2. Apply modifications to the code
+
+3. Select a version number following [Smoothver](https://github.com/Ahzed11/HotCI?tab=readme-ov-file#versioning)
+
+4. Bump the application and release version
+
+5. If the version does not require a restart, update the\
+    upgrade_downgrade_SUITE
+
+6. Merge the pull request
+
+7. Add a version tag to create a Github Release
+
+This rather simple ceremony ensures the unit testing of the module, the testing of the hot code upgrades and downgrades and the publication of releases.
