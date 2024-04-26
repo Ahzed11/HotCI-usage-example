@@ -2,6 +2,10 @@
 
 Usage example for [HotCI](https://github.com/Ahzed11/HotCI).
 
+## TLDR
+
+See: [Conclusion](https://github.com/Ahzed11/HotCI-usage-example?tab=readme-ov-file#conclusion).
+
 ## Introduction
 
 This README introduces the usage of the HotCI template with a new
